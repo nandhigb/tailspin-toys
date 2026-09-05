@@ -118,6 +118,41 @@ test.describe('Game Listing and Navigation', () => {
     });
   });
 
+  test('should filter games by category and publisher together', async ({ page }) => {
+    await test.step('Navigate to homepage and apply filters', async () => {
+      await page.goto('/');
+      await page.getByTestId('category-filter-strategy').check();
+      await page.getByTestId('publisher-filter').selectOption({ label: 'CodeForge Studios' });
+    });
+
+    await test.step('Verify only matching games remain visible', async () => {
+      const visibleCards = await page.locator('[data-testid="game-card"]').evaluateAll((cards) =>
+        cards
+          .filter((card) => getComputedStyle(card).display !== 'none')
+          .map((card) => ({
+            title: card.textContent ?? '',
+            category: (card as HTMLElement).dataset.gameCategory ?? '',
+            publisher: (card as HTMLElement).dataset.gamePublisher ?? '',
+          })),
+      );
+
+      expect(visibleCards).toHaveLength(1);
+      expect(visibleCards[0].title).toContain('DevOps Dominion');
+      expect(visibleCards[0].category).toBe('Strategy');
+      expect(visibleCards[0].publisher).toBe('CodeForge Studios');
+    });
+
+    await test.step('Clear the filters and restore the full catalog', async () => {
+      await page.getByTestId('clear-filters-button').click();
+
+      const visibleCards = await page.locator('[data-testid="game-card"]').evaluateAll((cards) =>
+        cards.filter((card) => getComputedStyle(card).display !== 'none').length,
+      );
+
+      expect(visibleCards).toBe(21);
+    });
+  });
+
   test('should return a 404 page for a non-existent game', async ({ page }) => {
     let response: Response | null;
 
