@@ -20,6 +20,13 @@ Refer to technology-specific instruction files:
 
 ## Core Principles
 
+### Comments and Documentation
+
+- Comment intent, constraints, and non-obvious decisions—not mechanics that are already clear from the code.
+- Do not add comments that merely paraphrase the next line or describe a variable assignment.
+- Keep comments, TSDoc, and component documentation current with the code. Update or remove stale documentation in the same change.
+- Use TSDoc/JSDoc for exported data-layer functions and document their purpose, parameters, and return values. See [`drizzle.instructions.md`](drizzle.instructions.md).
+
 ### Testability
 
 - Every interactive element MUST include a `data-testid` attribute
@@ -49,7 +56,14 @@ Refer to technology-specific instruction files:
 - Create reusable components for common UI patterns
 - Keep components focused on a single responsibility
 - Use props for configuration, not duplication
-- Document component APIs with TypeScript types
+- Document every reusable component's `Props` interface with a brief description of the component contract and its properties
+
+### TypeScript Formatting
+
+- Use four spaces for indentation in TypeScript and Astro frontmatter, single quotes for strings, and semicolons.
+- Keep trailing commas in multiline objects, arrays, parameters, and imports.
+- Use explicit parameter and return types for data-layer functions; prefer inferred types for local variables when the initializer is unambiguous.
+- Follow the repository ESLint configuration rather than introducing file-specific formatting exceptions.
 
 ## Development Workflow
 

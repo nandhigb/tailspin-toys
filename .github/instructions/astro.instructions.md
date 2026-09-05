@@ -20,7 +20,7 @@ import { getDatabase } from '../lib/db';
 import { getAllGames } from '../lib/games';
 
 interface Props {
-  title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
@@ -30,6 +30,25 @@ const games = await getAllGames(getDatabase());
 <Layout title={title}>
   {games.map((game) => <GameCard {game} />)}
 </Layout>
+```
+
+### Component Contracts and Documentation
+
+- Every reusable `.astro` component must define a `Props` interface in frontmatter, even when it currently has only one prop.
+- Document the component contract with a brief TSDoc comment above the interface, and document non-obvious props inline when their meaning or constraints are not clear from the type.
+- Keep `Props` documentation current when props are added, removed, renamed, or change behavior.
+- Comments in templates should explain intent or a non-obvious accessibility/layout decision; do not restate the rendered markup.
+
+```astro
+---
+/** Displays a compact game summary for use in a game listing. */
+interface Props {
+    /** Game data rendered by the card. */
+    game: Game;
+}
+
+const { game } = Astro.props;
+---
 ```
 
 ## Layouts
@@ -43,8 +62,10 @@ const games = await getAllGames(getDatabase());
 
 ```astro
 ---
+/** Provides the document shell and shared metadata for a page. */
 interface Props {
-  title: string;
+    /** Page title rendered in the document head. */
+    title: string;
 }
 const { title } = Astro.props;
 ---
@@ -109,8 +130,10 @@ There is no Svelte/React layer. When a page genuinely needs client behaviour, ad
 ## TypeScript
 
 - Use TypeScript for type-safe props
-- Define `Props` interface in frontmatter
+- Define and document a `Props` interface in frontmatter for every reusable component
 - Type component imports and helper return values
+- Use four spaces for indentation in Astro frontmatter, single quotes, semicolons, and trailing commas in multiline constructs
+- Follow the repository ESLint configuration and fix lint issues rather than suppressing them
 - Run `npx astro sync` to (re)generate route/content types before linting or type-checking
 - `.astro` files are type-checked by `npm run typecheck:astro` (which runs `astro sync` then `astro check`), on the classic `typescript` package. The pure TypeScript in `db/`, `src/lib/`, and `src/types/` is type-checked separately by `npm run typecheck` (the native TS 7 compiler, `tsgo`), which does **not** process `.astro` files.
 

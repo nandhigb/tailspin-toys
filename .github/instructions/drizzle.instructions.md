@@ -18,6 +18,30 @@ The app's data lives in a local SQLite database accessed through **Drizzle ORM**
 - `src/lib/db.ts` — `createDatabase(url)` / `getDatabase()` build the Drizzle client from `DATABASE_URL` (defaults to the local `tailspin.db` file).
 - `src/lib/games.ts` — typed, **injectable-db** data-access helpers used by pages and tests.
 
+## Comments and TSDoc
+
+- Comments must explain intent, constraints, or a non-obvious data-access decision. Do not restate what a query or statement already makes clear.
+- Every exported function in `db/` and `src/lib/` must have a TSDoc/JSDoc comment.
+- Each exported function comment must describe the function's purpose, every parameter (including the injectable `db` argument), and its return value. Document meaningful failure or not-found behavior when applicable.
+- Keep comments current: update or remove documentation whenever the related implementation changes.
+
+```ts
+/**
+ * Returns all publishers ordered alphabetically for deterministic builds.
+ *
+ * @param db - Injectable Drizzle database client used by pages and tests.
+ * @returns A promise containing the publishers in name order.
+ */
+export async function getAllPublishers(db: Database): Promise<Publisher[]> {
+    const rows = await db
+        .select({ id: publishers.id, name: publishers.name })
+        .from(publishers)
+        .orderBy(asc(publishers.name));
+
+    return rows;
+}
+```
+
 ## Schema Conventions
 
 - Use `sqliteTable` with explicit column names (`text`, `integer`, `real`).
@@ -45,11 +69,24 @@ import { asc, count, eq } from 'drizzle-orm';
 import type { Database } from './db';
 import { games } from '../../db/schema';
 
+/**
+ * Returns all game ids ordered by title for deterministic static paths.
+ *
+ * @param db - Injectable Drizzle database client.
+ * @returns A promise containing game ids in title order.
+ */
 export async function getAllGameIds(db: Database): Promise<number[]> {
-  const rows = await db.select({ id: games.id }).from(games).orderBy(asc(games.title));
-  return rows.map((r) => r.id);
+    const rows = await db.select({ id: games.id }).from(games).orderBy(asc(games.title));
+    return rows.map((row) => row.id);
 }
 ```
+
+## TypeScript Formatting
+
+- Use four spaces for indentation, single quotes, semicolons, and trailing commas in multiline constructs.
+- Exported data-access functions must declare explicit parameter and return types.
+- Prefer named selection objects and app-facing return types so Drizzle row shapes do not leak into callers.
+- Keep formatting compatible with the repository ESLint configuration; do not suppress lint rules to avoid formatting or type errors.
 
 - Always `order by` a stable column (title) so static builds are deterministic.
 - Map raw rows to the app-facing `Game`/`Publisher`/`Category` types in one place; don't leak Drizzle row shapes into components.
